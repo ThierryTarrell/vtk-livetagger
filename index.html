@@ -88,8 +88,13 @@ header{top:env(safe-area-inset-top,0);padding:6px 10px;flex-wrap:nowrap;gap:8px}
 .live #work .ag{grid-template-columns:repeat(4,1fr);gap:4px}.live #work .ag button{min-height:46px;font-size:12px;padding:2px 1px;line-height:1.1;border-left-width:5px}
 .live.roomy #work .ag{grid-template-columns:repeat(3,1fr)}.live.roomy #work .ag button{min-height:54px;font-size:14px}
 .chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(50px,1fr));gap:6px}.chips button{min-height:46px;font-size:17px;font-weight:700}.chips button.on{background:var(--red);border-color:var(--red);color:#fff}.chips button:disabled{opacity:.3}
+.gh2{grid-column:1/-1;display:flex;align-items:center;gap:6px;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#a8a8b0;height:14px;margin-top:3px}.gh2::after{content:"";flex:1;height:1px;background:#52525a}
+.roomy .blank{display:none}.live #work .ag button{min-height:44px}.live.roomy #work .ag button{min-height:54px}
+#logo img{height:38px!important}#nav button{padding:4px 8px;font-size:12px}
+.lc{min-height:52px;display:flex!important;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;padding:2px!important}.lc small{font-size:9px;font-weight:400}.lc.xi{background:var(--red)!important;border-color:var(--red)!important;color:#fff}.lc.sub{border-color:#e8b200!important;border-width:3px!important}.lc.out{opacity:.35}
+#brand{flex-wrap:wrap;row-gap:6px}#nav{gap:4px;margin-left:auto}#nav button{padding:4px 6px;font-size:11.5px;min-height:34px}
 </style></head><body>
-<div id="brand"><div id="logo"></div><div id="nav"><button id="an">Analysis</button><button id="setup">Setup</button><button id="mt">Matches</button></div></div>
+<div id="brand"><div id="logo"></div><div id="nav"><button id="an">Analysis</button><button id="lu">Lineup</button><button id="setup">Setup</button><button id="mt">Matches</button></div></div>
 <header><div id="clk" title="Tap to set the clock">00:00</div><div id="score"></div><div id="ph"></div><button id="main"></button><button id="pause">Pause</button></header>
 <div class="wrap">
 <section>
@@ -126,7 +131,7 @@ const zn=e=>{if(e.x==null)return['',''];const a=e.tm==='F'?e.x:100-e.x,y=e.tm===
 function load(){let s=null;try{s=JSON.parse(localStorage.getItem(K))}catch(e){}
 if(!s)s={cfg:{home:'Kwekwe United',away:'Opposition',focus:'home',fxi:'',fbn:'',oxi:'',obn:''},ev:[],clk:{run:false,base:0,at:0,half:1,ph:'pre'},last:null};
 const c=s.cfg;if(c.fxi===undefined){const l=(c.fsq||'').split('\n').filter(x=>x.trim());c.fxi=l.slice(0,11).join('\n');c.fbn=l.slice(11).join('\n');c.oxi=c.osq||'';c.obn=''}
-if(!c.fxi&&!c.fbn){c.fxi=Array.from({length:11},(_,i)=>(i+1)+' Player '+(i+1)).join('\n');c.fbn=Array.from({length:7},(_,i)=>(i+12)+' Sub '+(i+12)).join('\n')}
+
 if(!s.pos)s.pos={cur:'N',from:0,segs:[]};if(!s.mid)s.mid=String(Date.now());
 return s}
 let S=load(),sel={t:'F',k:null},an=0,mode=(()=>{try{return localStorage.getItem('vtk_mode')||'live'}catch(e){return'live'}})(),tab=0,showPit=false,dens=(()=>{try{return localStorage.getItem('vtk_dens')||'c'}catch(e){return'c'}})();
@@ -144,7 +149,7 @@ const fmt=s=>{s=Math.max(0,Math.floor(s));return String(Math.floor(s/60)).padSta
 const PH={pre:'Not started',h1:'First half',ht:'Half time',h2:'Second half',ft:'Full time'};
 function R(){
 const c=S.clk;$('#clk').textContent=fmt(el());$('#ph').textContent=PH[c.ph]+(c.run?'':(c.ph==='h1'||c.ph==='h2'?' (paused)':''));
-$('#main').textContent={pre:'Kick off',h1:'Half time',ht:'Start 2nd half (46:00)',h2:'Full time',ft:'Match ended'}[c.ph];
+$('#main').textContent={pre:S.lineupOk?'Kick off':'Set lineup',h1:'Half time',ht:'Start 2nd half (46:00)',h2:'Full time',ft:'Match ended'}[c.ph];
 $('#pause').textContent=c.run?'Pause':'Resume';$('#pause').style.display=(c.ph==='h1'||c.ph==='h2')?'':'none';
 document.body.classList.toggle('live',mode==='live');document.body.classList.toggle('roomy',dens==='r');document.body.classList.toggle('pit',showPit);$('#seg').innerHTML=`<button data-m="live" class="${mode==='live'?'on':''}">Live</button><button data-m="full" class="${mode==='full'?'on':''}">Full</button>`;scoreHdr();$('#logo').innerHTML=S.cfg.logo?`<img src="${S.cfg.logo}" alt="VTKSI" style="height:40px;background:#fff;border-radius:8px;padding:3px;display:block">`:LOGO;$('#setup').classList.toggle('todo',!S.cfg.sq);
 {const a=posAcc(0),q={F:0,O:0,D:0};a.forEach(b=>{q.F+=b.F;q.O+=b.O;q.D+=b.D});const T=q.F+q.O+q.D;$('#pos').innerHTML=['F','O','D'].map(s=>`<button data-p="${s}" class="${S.pos.cur===s?'on':''}">${s==='F'?esc(fN()):s==='O'?esc(oN()):'Loose / out'}${T?' '+Math.round(q[s]/T*100)+'%':''}</button>`).join('')}
@@ -152,7 +157,7 @@ $('#teams').innerHTML=['F','O'].map(t=>`<button data-t="${t}" class="${sel.t===t
 const pp=P(sel.t),pb=p=>`<button data-k="${esc(key(p))}" class="${sel.k===key(p)?'on':''}">${esc(p.n||p.name.slice(0,3))}</button>`;
 $('#pl').innerHTML=`<button data-k="" class="tm ${sel.k===null?'on':''}">Team</button>`+pp.on.map(pb).join('');
 {const btn=(a,l)=>`<button class="${a[2]}" data-a="${a[0]}">${l||a[1]}</button>`,hd=`<button data-hd="1" class="${sel.hd?'on':''}">Header</button>`;
-if(mode==='live'){$('#ac').innerHTML=LV.map(k=>k==='HD'?hd:k?(()=>{const a=A.find(x=>x[0]===k);return a?btn(a,SL[k]):''})():'<span></span>').join('')}
+if(mode==='live'){$('#ac').innerHTML=LV.map(k=>k==='HD'?hd:!k?'<span class="blank"></span>':k[0]==='#'?`<div class="gh2">${k.slice(1)}</div>`:(()=>{const a=A.find(x=>x[0]===k);return a?btn(a,SL[k]):''})()).join('')}
 else{const gs=[...new Set(A.map(a=>a[3]))];if(tab>=gs.length)tab=0;$('#ac').innerHTML=`<div class="tabs" style="grid-column:1/-1">${gs.map((n,i)=>`<button data-tab="${i}" class="${i===tab?'on':''}">${n.replace(/ \(.*\)/,'')}</button>`).join('')}</div>`+A.filter(a=>a[3]===gs[tab]).map(a=>btn(a)).join('')+(gs[tab]==='Attacking'?hd:'')}}
 const e=S.ev.find(x=>x.id===S.last);
 $('#dot').setAttribute('cx',e&&e.x!=null?e.x*1.05:-9);$('#dot').setAttribute('cy',e&&e.y!=null?e.y*.68:-9);
@@ -173,6 +178,7 @@ $('#undo').onclick=()=>{S.ev.pop();S.last=S.ev.length?S.ev[S.ev.length-1].id:nul
 $('#pause').onclick=()=>{const c=S.clk;if(c.run){c.base=el();c.run=false}else{c.at=Date.now();c.run=true}save();R()};
 $('#clk').onclick=()=>{const v=prompt('Set clock (mm:ss)',fmt(el()));if(!v)return;const m=v.match(/^(\d+):?(\d{0,2})$/);if(!m)return;const c=S.clk,s=(+m[1])*60+(+m[2]||0);c.base=s;c.at=Date.now();save();R()};
 $('#main').onclick=()=>{const c=S.clk;
+if(c.ph==='pre'&&!S.lineupOk){lineupDlg();return}
 if(c.ph==='pre'){S.clk={run:true,base:0,at:Date.now(),half:1,ph:'h1'}}
 else if(c.ph==='h1'){setPos('N');c.base=el();c.run=false;c.ph='ht';save();R();analysis(1);return}
 else if(c.ph==='ht'){S.clk={run:true,base:46*60,at:Date.now(),half:2,ph:'h2'}}
@@ -205,7 +211,7 @@ ${posHtml(h)}${terrHtml(h)}${playersHtml(h)}<h3>Full comparison</h3><table><tr><
 if(!$('#dlg').open)$('#dlg').showModal()}
 $('#an').onclick=()=>analysis(S.clk.half===2&&S.clk.ph!=='ht'?0:S.clk.half);
 /* ---------- setup ---------- */
-$('#setup').onclick=()=>{const c=S.cfg,sq=(c.sq||[...parse(c.fxi).map(p=>({...p,r:'xi'})),...parse(c.fbn).map(p=>({...p,r:'sub'}))]).slice();while(sq.length<22)sq.push({n:'',name:'',r:'sub'});$('#dlg').innerHTML=`<h2 style="margin:0">Match setup <small style="opacity:.55;font-size:12px">app v1.2</small></h2>
+$('#setup').onclick=()=>{const c=S.cfg,sq=(c.sq||[...parse(c.fxi).map(p=>({...p,r:'xi'})),...parse(c.fbn).map(p=>({...p,r:'sub'}))]).slice();while(sq.length<22)sq.push({n:'',name:'',r:'sub'});$('#dlg').innerHTML=`<h2 style="margin:0">Match setup <small style="opacity:.55;font-size:12px">app v1.3</small></h2>
 <label>Home team</label><input id="sh" value="${esc(c.home)}"><label>Away team</label><input id="sa" value="${esc(c.away)}"><div class="cols"><div><label>Match date</label><input id="sd" type="date" value="${esc(c.date||new Date().toISOString().slice(0,10))}"></div><div><label>Competition</label><input id="sc" value="${esc(c.comp||'')}" placeholder="e.g. Premier Soccer League"></div></div>
 <label>Button size on the Live screen</label><select id="sdn"><option value="c" ${dens==='c'?'selected':''}>Compact (4 across)</option><option value="r" ${dens==='r'?'selected':''}>Roomy (3 across)</option></select><label>Team I am focusing on</label><select id="sf"><option value="home" ${c.focus==='home'?'selected':''}>Home team</option><option value="away" ${c.focus==='away'?'selected':''}>Away team</option></select>
 <label>Your squad: type shirt number and name, then choose Starting XI, Sub or Not in squad</label>
@@ -348,11 +354,35 @@ $('#dlg').showModal();
 $('#e4').onclick=()=>{const tt=ps($('#e1').value),q=ps2.find(z=>key(z)===$('#e2').value);if(tt!=null){e.t=tt;e.h=tt>=2760?2:1}e.act=$('#e3').value;e.pn=q?q.n:'';e.pl=q?q.name:'';save();$('#dlg').close();R()};
 $('#e5').onclick=()=>{S.ev=S.ev.filter(x=>x!==e);if(S.last===e.id)S.last=S.ev.length?S.ev[S.ev.length-1].id:null;save();$('#dlg').close();R()}}
 /* ---------- live layout ---------- */
-const LV=['Goal','Penalty scored','Penalty missed','Big chance','Shot on target','Shot off target','Shot blocked','HD','Key pass','Cross successful','Cross unsuccessful','Corner','Turnover','Turnover led to chance','Turnover led to goal','Offside','Tackle won','Interception','Recovery','Clearance','Foul committed','Foul won','Yellow','Red','Save','GK punch','GK claim',null,'GK long success','GK short success','GK throw success',null,'GK long fail','GK short fail','GK throw fail',null];
+const LV=['#Attack','Goal','Penalty scored','Penalty missed','Big chance','Shot on target','Shot off target','Shot blocked','HD','Key pass','Cross successful','Cross unsuccessful','Corner','#Defence and turnovers','Tackle won','Interception','Recovery','Clearance','Turnover','Turnover led to chance','Turnover led to goal',null,'#Keeper','Save','GK punch','GK claim',null,'GK long success','GK short success','GK throw success',null,'GK long fail','GK short fail','GK throw fail',null,'#Fouls and cards','Offside','Foul committed','Foul won','Yellow','Red',null,null,null];
 const SL={'Penalty scored':'Pen. scored','Penalty missed':'Pen. missed','Shot on target':'On target','Shot off target':'Off target','Shot blocked':'Blocked','Cross successful':'Cross ✓','Cross unsuccessful':'Cross ✗','Turnover led to chance':'TO → chance','Turnover led to goal':'TO → goal','Interception':'Intercept','Recovery':'Recover','Clearance':'Clear','Foul committed':'Foul','GK punch':'Punch','GK claim':'Claim','GK long success':'Long ✓','GK short success':'Short ✓','GK throw success':'Throw ✓','GK long fail':'Long ✗','GK short fail':'Short ✗','GK throw fail':'Throw ✗'};
 $('#seg').onclick=e=>{const b=e.target.closest('[data-m]');if(b){mode=b.dataset.m;showPit=false;try{localStorage.setItem('vtk_mode',mode)}catch(x){}R()}};
 $('#bu').onclick=()=>$('#undo').onclick();$('#bs').onclick=()=>subDlg();$('#bp').onclick=()=>{showPit=!showPit;R()};
 function toast(m){const x=$('#toast');x.textContent=m;x.classList.add('on');clearTimeout(window._tt);window._tt=setTimeout(()=>x.classList.remove('on'),1800)}
+/* ---------- lineup ---------- */
+function lineupDlg(){if(S.clk.ph!=='pre'&&!confirm('The match has started. Changing the lineup now can mix up who played. Use Sub for changes. Continue anyway?'))return;
+const c=S.cfg,num=(a,b)=>(parseInt(a.n)||999)-(parseInt(b.n)||999),
+fr=()=>(c.sq||[...parse(c.fxi).map(p=>({...p,r:'xi'})),...parse(c.fbn).map(p=>({...p,r:'sub'}))]).map(x=>({...x})),
+or=()=>{let x=[...parse(c.oxi).map(p=>({...p,r:'xi'})),...parse(c.obn).map(p=>({...p,r:'sub'}))];if(!x.length)x=Array.from({length:18},(_,i)=>({n:String(i+1),name:'',r:i<11?'xi':'sub'}));return x},
+st={t:'F',m:'xi',F:fr(),O:or()};
+const draw=()=>{const rows=st[st.t],cnt=r=>rows.filter(x=>x.r===r).length;
+$('#dlg').innerHTML=`<h2 style="margin:0">Lineup</h2><div class="seg" style="margin-top:8px"><button data-lt="F" class="${st.t==='F'?'on':''}">${esc(fN())}</button><button data-lt="O" class="${st.t==='O'?'on':''}">${esc(oN())}</button></div>
+<div class="seg" style="grid-template-columns:1fr 1fr 1fr"><button data-lm="xi" class="${st.m==='xi'?'on':''}">Starting XI ${cnt('xi')}/11</button><button data-lm="sub" class="${st.m==='sub'?'on':''}">Bench ${cnt('sub')}</button><button data-lm="out" class="${st.m==='out'?'on':''}">Out</button></div>
+<p style="font-size:13px;opacity:.75;margin:4px 0">Choose Starting XI or Bench above, then tap the numbers to put them there. Tap a number again to take it out.</p>
+<div class="chips">${rows.map((x,i)=>[x,i]).sort((a,b)=>num(a[0],b[0])).map(([x,i])=>`<button data-li="${i}" class="lc ${x.r}"><b>${esc(x.n||'?')}</b><small>${esc((x.name||'').slice(0,7))}</small></button>`).join('')||'<div class="lr">No players yet. Add them below.</div>'}</div>
+<label>Add a player</label><div class="sr" style="grid-template-columns:70px 1fr 80px"><input id="ln" inputmode="numeric" placeholder="No."><input id="lnm" placeholder="Name (optional)"><button id="la">Add</button></div>
+<div class="bar"><button id="lk" style="background:var(--red);color:#fff">Save lineup</button><button id="lc2">Clear squad</button><button onclick="$('#dlg').close()">Cancel</button></div>`;
+$('#la').onclick=()=>{const n=$('#ln').value.trim(),nm=$('#lnm').value.trim();if(!n&&!nm)return;const e=rows.find(x=>n&&x.n===n);if(e){if(nm)e.name=nm;if(st.m!=='out')e.r=st.m}else rows.push({n,name:nm,r:st.m==='out'?'sub':st.m});draw()};
+$('#lc2').onclick=()=>{if(confirm('Remove every player from this team?')){st[st.t]=[];draw()}};
+$('#lk').onclick=()=>{const xi=st.F.filter(x=>x.r==='xi').length;if(xi!==11&&!confirm('You have '+xi+' players in your Starting XI, not 11. Save anyway?'))return;
+const tx=a=>a.map(p=>(p.n+' '+p.name).trim()).join('\n'),f=st.F,o=st.O.filter(x=>x.r!=='out');
+c.sq=f;c.fxi=tx(f.filter(x=>x.r==='xi'));c.fbn=tx(f.filter(x=>x.r==='sub'));c.oxi=tx(o.filter(x=>x.r==='xi'));c.obn=tx(o.filter(x=>x.r==='sub'));
+S.lineupOk=true;sel={t:'F',k:null};save();$('#dlg').close();R();toast('Lineup saved. Tap Kick off when ready.')}};
+window._lu={st,draw};draw();if(!$('#dlg').open)$('#dlg').showModal()}
+$('#lu').onclick=()=>lineupDlg();
+$('#dlg').addEventListener('click',e=>{const u=window._lu;if(!u)return;const b=e.target.closest('[data-lt],[data-lm],[data-li]');if(!b)return;const st=u.st;
+if(b.dataset.lt)st.t=b.dataset.lt;else if(b.dataset.lm)st.m=b.dataset.lm;else{const x=st[st.t][+b.dataset.li];x.r=(x.r===st.m)?'out':st.m}u.draw()});
+$('#dlg').addEventListener('close',()=>{window._lu=null});
 /* ---------- export ---------- */
 $('#csv').onclick=exportCsv;function exportCsv(){
 const q=v=>'"'+String(v).replace(/"/g,'""')+'"',d=(S.cfg.date||new Date().toISOString().slice(0,10));
